@@ -8,7 +8,11 @@ console.log('DEBUG: MONGO_URI=', process.env.MONGO_URI);
 const connectDB = require('./config/db');
 connectDB();
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.use(express.json());
 // serve static 'public' if exists
 const path = require('path');
