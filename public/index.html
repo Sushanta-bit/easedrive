@@ -339,6 +339,15 @@
             <form id="driverRegisterForm" onsubmit="return handleDriverRegister(event)">
               <div><label>Full name</label><input id="d_name" type="text" required></div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><label>Phone</label><input id="d_phone" type="text" required placeholder="+91..."></div><div><label>License no.</label><input id="d_license" type="text" required></div></div>
+              <div><label>Vehicle Type</label>
+              <select id="d_vehicleType" required>
+              <option value="">Select vehicle type</option>
+              <option value="auto">Auto</option>
+              <option value="micro">Micro</option>
+              <option value="sedan">Sedan</option>
+              <option value="prime">Prime</option>
+              </select>
+              </div>
               <div><label>Vehicle details (Make, Model, Reg No)</label><input id="d_vehicle" type="text" required></div>
               <div><label>ID Proof (mock)</label><input id="d_idfile" type="text" required placeholder="ID file name (mock)"></div>
               <div class="actions"><button class="primary-btn">Register Driver</button><button type="button" class="cta-ghost" onclick="clearDriverForm()">Clear</button><button type="button" class="cta-ghost" onclick="navigate('home')">Back Home</button>
@@ -655,39 +664,59 @@ function detectVehicleType(vehicleText){
 }
 async function handleDriverRegister(e){
   e.preventDefault();
+
   const name = document.getElementById('d_name').value.trim();
   const phone = document.getElementById('d_phone').value.trim();
   const license = document.getElementById('d_license').value.trim();
   const vehicle = document.getElementById('d_vehicle').value.trim();
   const idfile = document.getElementById('d_idfile').value.trim();
+  const vehicleType = document.getElementById('d_vehicleType').value;
+
   const msg = document.getElementById('driverRegMsg');
-  if(!name || !phone || !license || !vehicle || !idfile){
-    msg.innerHTML = '<div class="error">Please fill all fields.</div>'; return false;
+
+  if(!name || !phone || !license || !vehicle || !vehicleType || !idfile){
+    msg.innerHTML = '<div class="error">Please fill all fields.</div>'; 
+    return false;
   }
 
   try{
     const res = await apiFetch('/drivers', {
       method: 'POST',
-      body: JSON.stringify({ name, phone, license, vehicle, vehicleType: detectVehicleType(vehicle) })
+      body: JSON.stringify({ 
+        name, 
+        phone, 
+        license, 
+        vehicle,
+        vehicleType 
+      })
     });
-    // if created, refresh drivers from API
+
     await fetchDriversFromAPI();
-    msg.innerHTML = '<div class="success">Driver registered on server. Status: Pending verification (mock).</div>';
+    msg.innerHTML = '<div class="success">Driver registered on server.</div>';
     document.getElementById('driverRegisterForm').reset();
     updateWho();
+
   }catch(err){
-    // fallback local register
+    // fallback — local storage
     const id = 'd' + Date.now();
-    const drv = { id, name, phone, license, vehicle, vehicleType: detectVehicleType(vehicle), verified:false, avail:true, rating:4.5 };
-    drivers.push(drv);
-    saveJSON(MOCK_DRIVERS_KEY, drivers);
-    msg.innerHTML = '<div class="success">Driver registered locally. Status: Pending verification (mock).</div>';
+    drivers.push({
+      id, name, phone, license, vehicle, vehicleType,
+      verified: false,
+      avail: true,
+      rating: 4.5
+    });
+    
+    saveJSON('ease_drivers_v1', drivers);
+
+    msg.innerHTML = '<div class="success">Driver registered locally.</div>';
     document.getElementById('driverRegisterForm').reset();
     refreshDriverSelects();
     updateWho();
   }
+
   return false;
 }
+
 
 /* -------------------------
   Login (calls backend)
@@ -1131,7 +1160,7 @@ function typeWriterLetters(elementId, text, speed = 70) {
 
 // Start when DOM loads
 document.addEventListener("DOMContentLoaded", () => {
-  const sentence = "Drivers At Your Fingertips..";
+  const sentence = "EaseDrive-Drivers At Your Fingertips..";
   typeWriterLetters("typewriter", sentence, 90); // adjust speed here
 });
 
