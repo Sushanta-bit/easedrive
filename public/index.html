@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" href="images/easedrive-logo.png" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
-  #typewriter {
+#typewriter {
   white-space: pre-line;
 }
 
@@ -1182,12 +1182,20 @@ async function initUI(){
 }
 function typeWriterLetters(elementId, text, speed = 70) {
   const el = document.getElementById(elementId);
-  el.textContent = "";
+  el.innerHTML = ""; // use innerHTML because we will add <br>
   let i = 0;
 
   function type() {
     if (i < text.length) {
-      el.textContent += text.charAt(i);
+      const char = text.charAt(i);
+
+      // If newline, insert <br>
+      if (char === "\n") {
+        el.innerHTML += "<br>";
+      } else {
+        el.innerHTML += char;
+      }
+
       i++;
       setTimeout(type, speed);
     }
@@ -1195,6 +1203,7 @@ function typeWriterLetters(elementId, text, speed = 70) {
 
   type();
 }
+
 
 // Start when DOM loads
 document.addEventListener("DOMContentLoaded", () => {
