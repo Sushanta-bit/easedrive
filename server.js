@@ -1,47 +1,73 @@
-// server.js — CORS-friendly minimal version
+// server.js — clean version with strong .env debug
 const express = require('express');
-const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
+const dotenv = require('dotenv');
 
-dotenv.config();
+// --- DEBUG: show paths ---
+console.log('DEBUG: process.cwd() =', process.cwd());
+console.log('DEBUG: __dirname =', __dirname);
 
-console.log('DEBUG: MONGO_URI=', process.env.MONGO_URI);
+// --- Load .env from backend root ---
+const envPath = path.join(__dirname, '.env');
+const envExists = fs.existsSync(envPath);
+console.log('DEBUG: looking for .env at =', envPath, 'exists?', envExists);
 
-// create express app
-const app = express();
+if (envExists) {
+  const result = dotenv.config({ path: envPath });
+  if (result.error) {
+    console.error('DEBUG: dotenv error while parsing .env:', result.error);
+  } else {
+    console.log('DEBUG: dotenv loaded keys =', Object.keys(result.parsed || {}));
+  }
+} else {
+  console.error('FATAL: .env file not found at', envPath);
+}
 
-// --- CORS (allow all origins for development/testing) ---
-app.use(cors({
-  origin: '*',
-  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization','Accept'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-}));
+// --- Log env values (for debugging only) ---
+console.log('DEBUG: PORT =', process.env.PORT);
+console.log('DEBUG: MONGO_URI =', process.env.MONGO_URI);
+console.log('DEBUG: JWT_SECRET set? =', !!process.env.JWT_SECRET);
 
-// make sure preflight OPTIONS requests are handled
-app.options('*', cors());
+// If MONGO_URI missing, warn loudly but don’t crash app immediately
+if (!process.env.MONGO_URI) {
+  console.error('FATAL: MONGO_URI is undefined. Check your .env file.');
+}
 
-// JSON body parser
-app.use(express.json());
-
-// serve static 'public' if exists
-app.use(express.static(path.join(__dirname, 'public')));
-
-// connect DB (unchanged)
+// --- DB connect (uses MONGO_URI from process.env) ---
 const connectDB = require('./config/db');
 connectDB();
 
-// routes (after CORS and body parser)
+// --- Express app setup ---
+const app = express();
+
+// CORS (allow all for dev)
+app.use(
+  cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  })
+);
+app.options('*', cors());
+
+// JSON parser
+app.use(express.json());
+
+// Serve static frontend from /public
+app.use(express.static(path.join(__dirname, 'public')));
+
+// API routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/drivers', require('./routes/drivers'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/feedbacks', require('./routes/feedbacks'));
 
-// simple root health check
+// Health check
 app.get('/', (req, res) => res.send('EaseDrive API running'));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, ()=> console.log('Server started on port', PORT));
-
+app.listen(PORT, () => console.log('Server started on port', PORT));

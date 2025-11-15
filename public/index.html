@@ -7,6 +7,39 @@
 <link rel="icon" type="image/png" href="images/easedrive-logo.png" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
+#typewriter {
+  display: inline-block;
+  border-right: 3px solid var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  animation: caretBlink 0.7s infinite;
+  min-height: 42px;
+}
+
+@keyframes caretBlink {
+  0%, 50% { border-color: transparent; }
+  51%, 100% { border-color: var(--accent); }
+}
+
+  .logo-small {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
+
+  .section-content{
+    opacity:0;
+    transform:translateY(8px);
+    transition:opacity .22s ease, transform .22s ease;
+  }
+  .section-content.section-active{
+    opacity:1;
+    transform:translateY(0);
+  }
   :root{
     --bg:#f6fbf8;
     --card:#ffffff;
@@ -19,6 +52,48 @@
     --shadow: 0 10px 30px rgba(2,6,23,0.08);
     --soft-shadow: 0 6px 18px rgba(2,6,23,0.06);
   }
+    /* ---------- Page loader overlay ---------- */
+  .loader-overlay{
+    position:fixed;
+    inset:0;
+    background:radial-gradient(circle at top, #ecfdf5 0%, #f9fafb 45%, #e5f9f0 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:999;
+    transition:opacity .4s ease, visibility .4s ease;
+  }
+  .loader-overlay.hidden{
+    opacity:0;
+    visibility:hidden;
+  }
+  .loader-box{
+    padding:18px 22px;
+    border-radius:16px;
+    background:rgba(255,255,255,0.9);
+    box-shadow:0 18px 60px rgba(15,23,42,0.18);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+  }
+  .loader-spinner{
+    width:46px;
+    height:46px;
+    border-radius:999px;
+    border:4px solid #bbf7d0;
+    border-top-color:#10b981;
+    animation:spin .75s linear infinite;
+  }
+  .loader-text{
+    font-size:14px;
+    font-weight:600;
+    color:#065f46;
+  }
+  @keyframes spin{
+    to{ transform:rotate(360deg); }
+  }
+
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
@@ -39,9 +114,45 @@
   nav{display:flex;gap:14px;align-items:center}
   nav a{color:var(--muted);text-decoration:none;font-weight:600;padding:8px 10px;border-radius:10px;transition:all .18s;cursor:pointer}
   nav a:hover{color:var(--accent-700);background:rgba(16,185,129,0.06)}
-  .cta-ghost{border:1px solid #e6eef3;padding:8px 12px;border-radius:10px;background:#fff}
-  .primary-btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px;border:none;font-weight:700;box-shadow:0 6px 18px rgba(16,185,129,0.18);cursor:pointer;transition:transform .12s}
-  .primary-btn:active{transform:translateY(1px)}
+  .cta-ghost{
+    border:1px solid #e6eef3;
+    padding:8px 12px;
+    border-radius:10px;
+    background:#fff;
+    cursor:pointer;
+    font-weight:600;
+    transition:transform .16s ease, box-shadow .16s ease, background .16s ease, border-color .16s ease;
+  }
+  .cta-ghost:hover{
+    transform:translateY(-1px);
+    box-shadow:0 8px 22px rgba(15,23,42,0.06);
+    border-color:#d1fae5;
+    background:#f9fffc;
+  }
+  .cta-ghost:active{
+    transform:translateY(1px) scale(0.98);
+    box-shadow:none;
+  }
+  .primary-btn{
+    background:var(--accent);
+    color:#fff;
+    padding:10px 14px;
+    border-radius:10px;
+    border:none;
+    font-weight:700;
+    box-shadow:0 6px 18px rgba(16,185,129,0.18);
+    cursor:pointer;
+    transition:transform .16s ease, box-shadow .16s ease, background .16s ease;
+  }
+  .primary-btn:hover{
+    transform:translateY(-1px) scale(1.02);
+    box-shadow:0 14px 30px rgba(16,185,129,0.28);
+    background:var(--accent-700);
+  }
+  .primary-btn:active{
+    transform:translateY(1px) scale(0.97);
+    box-shadow:0 4px 10px rgba(16,185,129,0.25);
+  }
 
   .hero{display:flex;gap:28px;align-items:center;margin-top:18px;padding:28px;border-radius:16px;background:linear-gradient(90deg, rgba(16,185,129,0.03), rgba(2,6,23,0.01));position:relative;overflow:hidden}
   .hero-left{flex:1;min-width:320px;z-index:2}
@@ -128,7 +239,7 @@
 
     <section class="hero">
       <div class="hero-left">
-        <h2 class="hero-h">Drivers at your fingertips — fast, verified, dependable.</h2>
+        <h2 class="hero-h" id="typewriter"></h2>
         <p class="hero-sub">EaseDrive helps you hire drivers instantly. Choose pickup & destination, compare available drivers, and complete booking with secure payment — all in a few clicks.</p>
 
         <div class="hero-actions">
@@ -296,6 +407,7 @@
             <button class="cta-ghost" onclick="navigate('driver-register')">Driver Register</button>
             <button class="cta-ghost" onclick="navigate('booking')">Book</button>
             <button class="cta-ghost" onclick="navigate('home')">Home</button>
+            <button class="cta-ghost" onclick="logout()">Logout</button>
           </div>
         </div>
 
@@ -306,19 +418,46 @@
       </aside>
     </div>
 
-    <footer><div>Prototype — EaseDrive • Built for your mini project</div><div class="small">All data is stored locally (mock). Connect a backend for production.</div></footer>
+    <footer><div>Prototype — EaseDrive </div><div class="small">An Online Driver Hiring System</div></footer>
   </div>
 
   <!-- modal root (used for driver view / payment / auth prompt) -->
   <div id="modalRoot"></div>
+    <!-- Page loader overlay -->
+  <div id="pageLoader" class="loader-overlay">
+    <div class="loader-box">
+      <div class="loader-spinner"></div>
+      <div class="loader-text">Loading EaseDrive…</div>
+    </div>
+  </div>
+
 
 <script>
 /* ===== API helpers & auth state ===== */
-const API_BASE = 'https://easedrive-backend.onrender.com/api';
+// at top of your script
+const RENDER_URL = 'https://easedrive-backend.onrender.com/api'; // replace with your render URL
+const API_BASE = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+  ? 'http://localhost:5000/api'
+  : RENDER_URL;
+
 
 function getToken(){ return localStorage.getItem('easedrive_token'); }
 function setToken(t){ localStorage.setItem('easedrive_token', t); }
 function clearToken(){ localStorage.removeItem('easedrive_token'); localStorage.removeItem('easedrive_user'); }
+function logout(){
+  // clear auth in localStorage
+  clearToken(); // this already removes easydrive_token and easydrive_user in your code
+  localStorage.removeItem('easedrive_user'); // extra safety
+
+  // reset session object
+  session = { type: null, id: null, name: null };
+
+  // update UI text
+  updateWho();
+
+  // go back home
+  navigate('home');
+}
 
 async function apiFetch(path, opts = {}) {
   const headers = opts.headers ? {...opts.headers} : {};
@@ -390,7 +529,10 @@ function showAuthRequiredModal(targetId){
   UI: show/hide sections
 ------------------------- */
 function hideAllSections(){
-  document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+  document.querySelectorAll('.section-content').forEach(s => {
+    s.classList.add('hidden');
+    s.classList.remove('section-active');
+  });
   document.getElementById('mainAreaPlaceholder').style.display = 'flex';
 }
 function showSection(id){
@@ -406,6 +548,7 @@ function showSection(id){
   const el = document.getElementById(id);
   if(!el) return alert('Section not found: ' + id);
   el.classList.remove('hidden');
+  el.classList.add('section-active');
   el.scrollIntoView({behavior:'smooth'});
   if(id === 'booking') {
     const dt = new Date().toISOString().slice(0,10);
@@ -435,6 +578,9 @@ function seedDrivers(){
 async function fetchDriversFromAPI(){
   try{
     const list = await apiFetch('/drivers');
+    if (!Array.isArray(list) || list.length === 0) {
+      throw new Error('No drivers returned from API');
+    }
     // normalize id field
     drivers = list.map(d => {
       return {
@@ -499,6 +645,14 @@ async function handleUserRegister(e){
 function clearUserForm(){ document.getElementById('userRegisterForm').reset(); document.getElementById('userRegMsg').innerHTML=''; }
 
 /* ---------- Driver register (calls backend if available) ---------- */
+// helper: guess vehicle type from text
+function detectVehicleType(vehicleText){
+  const t = (vehicleText || '').toLowerCase();
+  if(t.includes('auto')) return 'auto';
+  if(t.includes('sedan') || t.includes('swift') || t.includes('indica') || t.includes('i10')) return 'sedan';
+  if(t.includes('innova') || t.includes('fortuner') || t.includes('prime')) return 'prime';
+  return 'micro';
+}
 async function handleDriverRegister(e){
   e.preventDefault();
   const name = document.getElementById('d_name').value.trim();
@@ -869,36 +1023,41 @@ function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
 /* misc UI updates */
 async function loadRecentBookings(){
   const cont = document.getElementById('recentBookings');
-  cont.innerHTML = '';
-  if(getToken()){
-    try{
-      const list = await apiFetch('/bookings');
-      if(!list || list.length===0){ cont.innerHTML = '<div class="small muted">No bookings yet</div>'; return; }
-      list.slice(-4).reverse().forEach(b=>{
-        const d = drivers.find(x=>x.id===b.driverId) || {};
-        const div = document.createElement('div');
-        div.style.padding='8px';
-        div.style.borderBottom='1px solid #f1f5f9';
-        div.innerHTML = `<div style="font-weight:700">${d.name || b.driverName}</div><div class="small muted">${b.pickup} → ${b.dest} • ₹${b.fare}</div><div class="small">Status: ${b.status}</div>`;
-        cont.appendChild(div);
-      });
-      return;
-    }catch(err){
-      console.warn('Could not load bookings from API', err.message);
-    }
+  if (!cont) return;
+
+  // If not logged in, don't show old local bookings
+  if (!getToken()){
+    cont.innerHTML = '<div class="small muted">Login to see your bookings</div>';
+    return;
   }
-  // fallback to local
-  const items = bookings.slice(-4).reverse();
-  if(items.length===0){ cont.innerHTML = '<div class="small muted">No bookings yet</div>'; return; }
-  items.forEach(b=>{
-    const d = drivers.find(x=>x.id===b.driverId) || {};
-    const div = document.createElement('div');
-    div.style.padding='8px';
-    div.style.borderBottom='1px solid #f1f5f9';
-    div.innerHTML = `<div style="font-weight:700">${d.name || b.driverName}</div><div class="small muted">${b.pickup} → ${b.dest} • ₹${b.fare}</div><div class="small">Status: ${b.status}</div>`;
-    cont.appendChild(div);
-  });
+
+  try{
+    const list = await apiFetch('/bookings');
+    cont.innerHTML = '';
+
+    if (!list || list.length === 0){
+      cont.innerHTML = '<div class="small muted">No bookings yet</div>';
+      return;
+    }
+
+    list.slice(-4).reverse().forEach(b => {
+      const d = drivers.find(x => x.id === b.driverId) || {};
+      const div = document.createElement('div');
+      div.style.padding = '8px';
+      div.style.borderBottom = '1px solid #f1f5f9';
+      div.innerHTML = `
+        <div style="font-weight:700">${d.name || b.driverName}</div>
+        <div class="small muted">${b.pickup} → ${b.dest} • ₹${b.fare}</div>
+        <div class="small">Status: ${b.status}</div>
+      `;
+      cont.appendChild(div);
+    });
+  }catch(err){
+    console.warn('Could not load bookings from API', err.message);
+    cont.innerHTML = '<div class="small muted">Could not load bookings.</div>';
+  }
 }
+
 function refreshRecentBookings(){ loadRecentBookings(); }
 
 function refreshDriverSelects(){
@@ -949,7 +1108,33 @@ async function initUI(){
       showSection(h);
     }
   }
+  const loader = document.getElementById('pageLoader');
+  if(loader){
+    setTimeout(()=> loader.classList.add('hidden'), 300);
+  }
 }
+function typeWriterLetters(elementId, text, speed = 70) {
+  const el = document.getElementById(elementId);
+  el.textContent = "";
+  let i = 0;
+
+  function type() {
+    if (i < text.length) {
+      el.textContent += text.charAt(i);
+      i++;
+      setTimeout(type, speed);
+    }
+  }
+
+  type();
+}
+
+// Start when DOM loads
+document.addEventListener("DOMContentLoaded", () => {
+  const sentence = "Drivers At Your Fingertips..";
+  typeWriterLetters("typewriter", sentence, 90); // adjust speed here
+});
+
 initUI();
 
 window.addEventListener('beforeunload', ()=>{ saveJSON(MOCK_DRIVERS_KEY,drivers); saveJSON(MOCK_USERS_KEY,users); saveJSON(BOOKINGS_KEY,bookings); saveJSON(FEEDBACKS_KEY,feedbacks); });
